@@ -2,6 +2,9 @@ const express = require("express");
 const morgan = require('morgan')
 const cors = require('cors')
 const app = express();
+require('dotenv').config()
+const Contact = require('./models/contact');
+
 app.use(cors())
 app.use(express.json())
 app.use(morgan('tiny'))
@@ -54,31 +57,29 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Contact
+    .find({})
+    .then(contact => {
+      res.json(contact)
+    })
 })
 
 app.post('/api/persons', (req, res) => {
-  console.log(req.body)
-  let personObject = {
-    id: Math.floor((Math.random() * 100) + 1),
-    name: req.body.name,
-    number: req.body.number
-  }
+    const body = req.body
+    
+    if (body.name === undefined) {
+      return response.status(400).json({ error: 'content missing' })
+    }
   
-  console.log(personObject)
-  if (personObject.name === undefined) {
-    return res.status(400).json({ error: 'name missing' })
-  }
-  else if (personObject.number === undefined) {
-    return res.status(400).json({ error: 'number missing' })
-  }
-  else if (persons.some(person => (person.name===personObject.name))) {
-    return res.status(400).json({ error: 'name must be unique' })
-}
-    res.json(personObject)
-    persons = persons.concat(personObject)
+    const contact = new Contact({
+      name: body.name,
+      number: body.number
+    })
   
-})
+    contact.save().then(savedContact => {
+      res.json(savedContact)
+    })
+  })
   
 
 
